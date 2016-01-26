@@ -16,6 +16,8 @@ env.Append(BUILDERS = {'List' : list})
 
 env.Program('readAndWritePins', ['readAndWritePins.c',
                       '../lib/timer.c',
-                      '../lib/ui.c'])
+                      '../lib/ui.c',
+                      '../lib/pin.c',
+                      '../lib/oc.c'])
 env.Hex('readAndWritePins')
 env.List('readAndWritePins')
