@@ -18,6 +18,8 @@ env.Program('readAndWritePins', ['readAndWritePins.c',
                       '../lib/timer.c',
                       '../lib/ui.c',
                       '../lib/pin.c',
-                      '../lib/oc.c'])
+                      '../lib/oc.c',
+                      '../lib/spi.c'
+                      ])
 env.Hex('readAndWritePins')
 env.List('readAndWritePins')
