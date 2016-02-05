@@ -16,12 +16,15 @@ while(1):
 #	print mag
 
 	angle = myencoder.enc_readReg(ENC_ANGLE)
-	angle = struct.unpack('<h',angle)[0]
-	angle = bin(angle)[2:]
+	angle = struct.unpack('<H',angle)[0]
+
+	
+
+	angle = bin(angle)
+	angle = angle[4:].zfill(14)
 	angle = int(angle,2)
-	angle = angle*360.0/2**14
-	if angle > 360:
-		angle = angle-360
-	print angle
+	#print "int = ",angle
+	angle = (angle*360.0)/(2**14)
+	print "angle = ", angle
 
 	time.sleep(1)
