@@ -20,11 +20,16 @@ while(1):
 
 	
 
-	angle = bin(angle)
-	angle = angle[4:].zfill(14)
-	angle = int(angle,2)
+	binAngleOrig = bin(angle)
+	binAngle = binAngleOrig[4:]
+	binAngle.zfill(14)
+	intAngle = int(binAngle,2)
 	#print "int = ",angle
-	angle = (angle*360.0)/(2**14)
-	print "angle = ", angle
+	angle = (intAngle*360.0)/(2**14)
+	if binAngleOrig[3] == "0":
+		print "angle = ", angle, "  intAngle = ", intAngle, "   binAngle = ", binAngleOrig[5:], "   binAngleOrig = ", binAngleOrig
+	else:
+		print "error"
+		#print "angle = ", angle, "  intAngle = ", intAngle, "   binAngle = ", binAngle, "   binAngleOrig = ", binAngleOrig
 
 	time.sleep(1)
