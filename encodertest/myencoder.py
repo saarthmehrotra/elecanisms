@@ -27,7 +27,7 @@ while(1):
 	#print "int = ",angle
 	angle = (intAngle*360.0)/(2**14)
 	if binAngleOrig[3] == "0":
-		print "angle = ", angle, "  intAngle = ", intAngle, "   binAngle = ", binAngleOrig[5:], "   binAngleOrig = ", binAngleOrig
+		print "angle = ", angle, "  intAngle = ", intAngle, "   binAngle = ", binAngle, "   binAngleTruncated = ",binAngle[4:]   binAngleOrig = ", binAngleOrig
 	else:
 		print "error"
 		#print "angle = ", angle, "  intAngle = ", intAngle, "   binAngle = ", binAngle, "   binAngleOrig = ", binAngleOrig
