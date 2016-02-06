@@ -32,7 +32,7 @@ int16_t main(void) {
     
 
     pin_clear(&D[3]);
-    spi_open(&spi1, &D[1], &D[0], &D[2], sfreq);
+    // spi_open(&spi1, &D[1], &D[0], &D[2], sfreq);
     printf("starting \n");
 
 
@@ -46,8 +46,8 @@ int16_t main(void) {
     oc_pwm(&oc8, &D[8], &timer3, freq, duty); 
     oc_pwm(&oc8, &D[6], &timer3, freq, duty); 
     
-    uint8_t data = spi_transfer(&spi1, val) ;
-    printf("connected \n");
-    printf("val %u \n",data);
+    // uint8_t data = spi_transfer(&spi1, val) ;
+    // printf("connected \n");
+    // printf("val %u \n",data);
     }
 }
