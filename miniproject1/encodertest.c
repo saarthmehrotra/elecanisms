@@ -6,6 +6,8 @@
 #include "usb.h"
 #include "pin.h"
 #include "spi.h"
+#include "oc.h"
+#include "timer.h"
 
 #define TOGGLE_LED1         1
 #define TOGGLE_LED2         2
@@ -116,6 +118,13 @@ int16_t main(void) {
     init_ui();
     init_pin();
     init_spi();
+    init_timer();
+    init_oc();
+
+    float freq = 2500;
+    uint16_t duty = 80;
+    uint8_t val = 1;
+    timer_start(&timer1);
 
     ENC_MISO = &D[1];
     ENC_MOSI = &D[0];
@@ -132,6 +141,8 @@ int16_t main(void) {
         ServiceUSB();                       // ...service USB requests
     }
     while (1) {
+        oc_pwm(&oc1, &D[8], &timer3, freq, duty); 
+        oc_pwm(&oc1, &D[6], &timer3, freq, duty); 
         ServiceUSB();                       // service any pending USB requests
     }
 }
