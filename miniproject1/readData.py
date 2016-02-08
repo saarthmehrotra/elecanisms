@@ -1,4 +1,6 @@
 import csv
+import matplotlib.pyplot as plt
+import numpy as np
 with open('data.csv', 'rb') as f:
     reader = csv.reader(f)
     your_list = list(reader)
@@ -8,6 +10,12 @@ for item in your_list[0]:
 	#print item
 	dataArray.append(int(float(item)))
 
+
+plt.plot(dataArray)
+plt.title('Angle vs Time')
+plt.xlabel('Time')
+plt.ylabel('Angle of Motor')
+plt.show()
 
 revolutionArray = []
 revolutions = 0
@@ -35,3 +43,9 @@ for i in range(len(dataArray)):
 
 
 print revolutionArray
+
+plt.plot(revolutionArray)
+plt.title('Revolutions vs Time')
+plt.xlabel('Time')
+plt.ylabel('# of Revolutions')
+plt.show()
