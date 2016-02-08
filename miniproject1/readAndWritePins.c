@@ -131,8 +131,10 @@ int16_t main(void) {
     ENC_SCK = &D[2];
     ENC_NCS = &D[3];
 
+
     pin_digitalOut(ENC_NCS);
     pin_set(ENC_NCS);
+
 
     spi_open(&spi1, ENC_MISO, ENC_MOSI, ENC_SCK, 2e6 ,1);
 
@@ -147,15 +149,13 @@ int16_t main(void) {
     timer_start(&timer2);
 
     while (1) {
-        if (timer_flag(&timer2)) {
-            timer_lower(&timer2);
-            led_toggle(&led1);
-            led_toggle(&led2);
-            //oc_pwm(&oc1, &D[8], &timer3, freq, duty);
-        }
-        oc_pwm(&oc1, &D[8], &timer3, freq, duty);
-     
+
+
+
+        oc_pwm(&oc1, &D[8], &timer3, freq, duty); 
+        oc_pwm(&oc1, &D[6], &timer3, freq, duty); 
         ServiceUSB();                       // service any pending USB requests
-        //oc_pwm(&oc1, &D[7], &timer3, freq, duty);
+
+
     }
 }
