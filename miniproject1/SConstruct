@@ -32,6 +32,7 @@ env.Program('readAndWritePins', ['readAndWritePins.c',
                         '../lib/spi.c',
                         '../lib/timer.c',
                         '../lib/oc.c',
+                        '../lib/uart.c',
                         '../lib/common.c'])
 
 #print('Creating builder to load hex file via bootloader...')

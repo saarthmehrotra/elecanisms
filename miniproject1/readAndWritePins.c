@@ -121,10 +121,10 @@ int16_t main(void) {
     init_timer();
     init_oc();
 
-    float freq = 2500;
-    uint16_t duty = 80;
+    float freq = 10000;
+    uint16_t duty = 100;
     uint8_t val = 1;
-    timer_start(&timer1);
+
 
     ENC_MISO = &D[1];
     ENC_MOSI = &D[0];
@@ -140,9 +140,22 @@ int16_t main(void) {
     while (USB_USWSTAT!=CONFIG_STATE) {     // while the peripheral is not configured...
         ServiceUSB();                       // ...service USB requests
     }
+
+    led_on(&led1);
+    led_off(&led2);
+    timer_setPeriod(&timer2, 1);
+    timer_start(&timer2);
+
     while (1) {
-        oc_pwm(&oc1, &D[8], &timer3, freq, duty); 
-        oc_pwm(&oc1, &D[6], &timer3, freq, duty); 
+        if (timer_flag(&timer2)) {
+            timer_lower(&timer2);
+            led_toggle(&led1);
+            led_toggle(&led2);
+            //oc_pwm(&oc1, &D[8], &timer3, freq, duty);
+        }
+        oc_pwm(&oc1, &D[8], &timer3, freq, duty);
+     
         ServiceUSB();                       // service any pending USB requests
+        //oc_pwm(&oc1, &D[7], &timer3, freq, duty);
     }
 }
