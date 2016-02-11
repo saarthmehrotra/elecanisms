@@ -39,9 +39,20 @@ WORD enc_readReg(WORD address) {
     result.b[1] = spi_transfer(&spi1, 0);
     result.b[0] = spi_transfer(&spi1, 0);
     pin_set(ENC_NCS);
+    
     return result;
+
 }
 
+void resultMath(result){
+    uint16_t temp; 
+    if(~((result >> 15) & 1)) {
+        temp = result & 0011111111111111;
+        temp = temp << 2; 
+        degree = (temp * 360)/(1<<14); 
+    }
+    else
+}
 //void ClassRequests(void) {
 //    switch (USB_setup.bRequest) {
 //        default:
