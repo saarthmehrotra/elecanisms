@@ -149,8 +149,8 @@ int16_t main(void) {
     ENC_SCK = &D[2];
     ENC_NCS = &D[3];
 
-    val1 = 0;
-    val2 = 0;
+    int val1 = 0;
+    int val2 = 0;
 
 
     pin_digitalOut(ENC_NCS);

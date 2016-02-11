@@ -18,7 +18,9 @@ env.Append(BUILDERS = {'List' : list})
 
 env.Program('blink', ['blink.c',
                       '../lib/timer.c',
-                      '../lib/ui.c'])
+                      '../lib/ui.c',
+                      '../lib/uart.c',
+                      '../lib/pin.c'])
 
 print('Creating builder to load hex file via bootloader...')
 # def load_function(target, source, env):
