@@ -44,22 +44,28 @@ WORD enc_readReg(WORD address) {
     result.b[1] = spi_transfer(&spi1, 0);
     result.b[0] = spi_transfer(&spi1, 0);
     pin_set(ENC_NCS);
-    degree = resultMath(result);
-    printf("This thing: %d\n\r", result);
+    // printf("b[0]: %i\n\r", result.b[0]);
+    // printf("b[1]: %i\n\r", result.b[1]);
+    degree = (result.b[1]<<8) | result.b[0];
+    //printf("Print Degree: %i\n\r", degree);
+    resultMath(degree);
     return result;
-
 
 }
 
-uint16_t resultMath(WORD result){
+//TOREAD ON SCREEN run
+// screen /dev/ttyUSB0 19200
+
+void resultMath(uint16_t result) {
     uint16_t temp; 
     uint16_t degree;
+    printf("%i\n\r", ~((result >> 15) & 1));
     if(~((result >> 15) & 1)) {
         temp = result & 0011111111111111;
         temp = temp << 2; 
         degree = (temp * 360)/(1<<14);
-        //printf(degree, 'i');
-        return degree;
+        printf("%i\n\r", degree);
+        //return degree;
     }
 
 }
@@ -192,7 +198,6 @@ int16_t main(void) {
 
 
     while (1) {
-
 
         oc_pwm(&oc1, &D[8], &timer3, freq, duty); 
         oc_pwm(&oc1, &D[6], &timer3, freq, duty); 
