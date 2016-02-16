@@ -34,6 +34,7 @@ while(1):
 	if binAngleOrig[3] == "0":
 		#print "angle = ", angle, "  intAngle = ", intAngle, "   binAngle = ", binAngle, "   binAngleTruncated = ", binAngleOrig[4:], "   binAngleOrig = ", binAngleOrig, "   origAngle = ", origAngle 
 		print angle
+		#time.sleep(1)
 		#f.write(str(angle)+',')
 	# angleList.append(angle)
 

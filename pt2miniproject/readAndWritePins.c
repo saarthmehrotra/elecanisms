@@ -24,7 +24,9 @@
 
 #define REG_MAG_ADDR        0x3FFE
 
-uint16_t val1, val2,revs;
+uint16_t val1, val2;
+uint16_t revs = 0;
+int16_t prevAngle = 0;
 
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
 _PIN *ENC_NCS;
@@ -57,19 +59,31 @@ WORD enc_readReg(WORD address) {
 // screen /dev/ttyUSB0 19200
 
 void resultMath(uint16_t result) {
-    uint16_t temp; 
-    uint16_t degree;
-    printf("Print Result: %i\n\r", result);
+    int16_t Angle; 
+    int16_t diff;
+    //printf("Print Result: %i\n\r", result);
     // printf("%u\n\r", (result >> 15));
     // printf("%u\n\r", (result >> 15) & (uint8_t)01);
     if(~((result >> 15) & 1)) {
-        temp = result & 16383;
-        printf("%u\n\r", temp);
+        Angle = result & 16383;
+        diff = Angle-prevAngle;
+        if (diff> 5000){
+            revs++;
+        }
+        else if (diff< -5000){
+                revs--;
+            }
 
 
-        //temp = temp << 2; 
-        //printf("%u\n\r", temp);
-        // degree = (temp * 45);
+        // printf("Print Angle: %i\n\r", Angle);
+        // printf("Print PrevA: %i\n\r", prevAngle);
+        // printf("Print diff: %i\n\r", diff);     
+        //printf("Print revs: %i\n\r", revs);   
+        prevAngle = Angle;
+
+        //Angle = Angle << 2; 
+        //printf("%u\n\r", Angle);
+        // degree = (Angle * 45);
         // printf("%u\n\r", degree);
         // degree = degree/(01<<12);
         // printf("%u\n\r", degree);
