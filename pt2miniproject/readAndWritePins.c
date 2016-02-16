@@ -1,5 +1,6 @@
 #include <p24FJ128GB206.h>
 #include <stdint.h>
+#include <stdio.h>
 #include "config.h"
 #include "common.h"
 #include "ui.h"
@@ -22,6 +23,8 @@
 
 #define REG_MAG_ADDR        0x3FFE
 
+uint16_t val1, val2;
+
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
 _PIN *ENC_NCS;
 
@@ -41,7 +44,7 @@ WORD enc_readReg(WORD address) {
     result.b[0] = spi_transfer(&spi1, 0);
     pin_set(ENC_NCS);
     // degree = resultMath(result);
-    printf("%u", result);
+    printf("%d \n", result);
     return result;
 
 
@@ -69,6 +72,7 @@ WORD enc_readReg(WORD address) {
 void VendorRequests(void) {
     WORD32 address;
     WORD result;
+    WORD temp; 
 
     switch (USB_setup.bRequest) {
         case TOGGLE_LED1:
@@ -108,22 +112,22 @@ void VendorRequests(void) {
             BD[EP0IN].bytecount = 1;         // set EP0 IN byte count to 1
             BD[EP0IN].status = 0xC8;         // send packet as DATA1, set UOWN bit
             break;
-        case SET_VALS:
-            val1 = USB_setup.wValue.w;
-            val2 = USB_setup.wIndex.w;
-            BD[EP0IN].bytecount = 0;    // set EP0 IN byte count to 0 
-            BD[EP0IN].status = 0xC8;    // send packet as DATA1, set UOWN bit
-            break;
-        case GET_VALS:
-            temp.w = val1;
-            BD[EP0IN].address[0] = temp.b[0];
-            BD[EP0IN].address[1] = temp.b[1];
-            temp.w = val2;
-            BD[EP0IN].address[2] = temp.b[0];
-            BD[EP0IN].address[3] = temp.b[1];
-            BD[EP0IN].bytecount = 4;    // set EP0 IN byte count to 4
-            BD[EP0IN].status = 0xC8;    // send packet as DATA1, set UOWN bit
-            break;        
+        // case SET_VALS:
+        //     val1 = USB_setup.wValue.w;
+        //     val2 = USB_setup.wIndex.w;
+        //     BD[EP0IN].bytecount = 0;    // set EP0 IN byte count to 0 
+        //     BD[EP0IN].status = 0xC8;    // send packet as DATA1, set UOWN bit
+        //     break;
+        // case GET_VALS:
+        //     temp.w = val1;
+        //     BD[EP0IN].address[0] = temp.b[0];
+        //     BD[EP0IN].address[1] = temp.b[1];
+        //     temp.w = val2;
+        //     BD[EP0IN].address[2] = temp.b[0];
+        //     BD[EP0IN].address[3] = temp.b[1];
+        //     BD[EP0IN].bytecount = 4;    // set EP0 IN byte count to 4
+        //     BD[EP0IN].status = 0xC8;    // send packet as DATA1, set UOWN bit
+        //     break;        
         default:
             USB_error_flags |= 0x01;    // set Request Error Flag
     }
