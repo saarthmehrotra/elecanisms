@@ -8,6 +8,7 @@
 #include "pin.h"
 #include "spi.h"
 #include "oc.h"
+#include "uart.h"
 #include "timer.h"
 
 #define TOGGLE_LED1         1
@@ -43,24 +44,25 @@ WORD enc_readReg(WORD address) {
     result.b[1] = spi_transfer(&spi1, 0);
     result.b[0] = spi_transfer(&spi1, 0);
     pin_set(ENC_NCS);
-    // degree = resultMath(result);
-    printf("%d \n", result);
+    degree = resultMath(result);
+    printf("This thing: %d\n\r", result);
     return result;
 
 
 }
 
-// void resultMath(result){
-//     uint16_t temp; 
-//     uint16_t degree;
-//     if(~((result >> 15) & 1)) {
-//         temp = result & 0011111111111111;
-//         temp = temp << 2; 
-//         degree = (temp * 360)/(1<<14);
-//         printf(degree, 'i');
-//     }
-//     else
-// }
+uint16_t resultMath(WORD result){
+    uint16_t temp; 
+    uint16_t degree;
+    if(~((result >> 15) & 1)) {
+        temp = result & 0011111111111111;
+        temp = temp << 2; 
+        degree = (temp * 360)/(1<<14);
+        //printf(degree, 'i');
+        return degree;
+    }
+
+}
 
 //void ClassRequests(void) {
 //    switch (USB_setup.bRequest) {
@@ -159,6 +161,7 @@ int16_t main(void) {
     init_spi();
     init_timer();
     init_oc();
+    init_uart();
 
     float freq = 10000;
     uint16_t duty = 100;
@@ -191,10 +194,10 @@ int16_t main(void) {
     while (1) {
 
 
-
         oc_pwm(&oc1, &D[8], &timer3, freq, duty); 
         oc_pwm(&oc1, &D[6], &timer3, freq, duty); 
         ServiceUSB();                       // service any pending USB requests
+
 
 
     }

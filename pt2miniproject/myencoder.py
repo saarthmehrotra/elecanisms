@@ -20,6 +20,8 @@ while(1):
 
 
 	pack = myencoder.enc_readReg(ENC_ANGLE)
+	print pack
+
 	origAngle = struct.unpack('<H',pack)[0]
 
 	print origAngle
