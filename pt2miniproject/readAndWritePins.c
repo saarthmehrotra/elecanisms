@@ -27,6 +27,7 @@ _PIN *ENC_NCS;
 
 WORD enc_readReg(WORD address) {
     WORD cmd, result;
+    uint16_t degree;
     cmd.w = 0x4000|address.w; //set 2nd MSB to 1 for a read
     cmd.w |= parity(cmd.w)<<15; //calculate even parity for
 
@@ -39,20 +40,25 @@ WORD enc_readReg(WORD address) {
     result.b[1] = spi_transfer(&spi1, 0);
     result.b[0] = spi_transfer(&spi1, 0);
     pin_set(ENC_NCS);
-    
+    // degree = resultMath(result);
+    printf("%u", result);
     return result;
 
+
 }
 
-void resultMath(result){
-    uint16_t temp; 
-    if(~((result >> 15) & 1)) {
-        temp = result & 0011111111111111;
-        temp = temp << 2; 
-        degree = (temp * 360)/(1<<14); 
-    }
-    else
-}
+// void resultMath(result){
+//     uint16_t temp; 
+//     uint16_t degree;
+//     if(~((result >> 15) & 1)) {
+//         temp = result & 0011111111111111;
+//         temp = temp << 2; 
+//         degree = (temp * 360)/(1<<14);
+//         printf(degree, 'i');
+//     }
+//     else
+// }
+
 //void ClassRequests(void) {
 //    switch (USB_setup.bRequest) {
 //        default:
@@ -163,6 +169,7 @@ int16_t main(void) {
     int val1 = 0;
     int val2 = 0;
 
+    // resultMath(0000111100001111); 
 
     pin_digitalOut(ENC_NCS);
     pin_set(ENC_NCS);
@@ -174,6 +181,7 @@ int16_t main(void) {
     while (USB_USWSTAT!=CONFIG_STATE) {     // while the peripheral is not configured...
         ServiceUSB();                       // ...service USB requests
     }
+
 
 
     while (1) {
