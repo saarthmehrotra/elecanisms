@@ -33,7 +33,6 @@ while(1):
 	angle = (intAngle*360.0)/(2**14)
 	if binAngleOrig[3] == "0":
 		#print "angle = ", angle, "  intAngle = ", intAngle, "   binAngle = ", binAngle, "   binAngleTruncated = ", binAngleOrig[4:], "   binAngleOrig = ", binAngleOrig, "   origAngle = ", origAngle 
-		#sleep(1)
 		print angle
 		#f.write(str(angle)+',')
 	# angleList.append(angle)

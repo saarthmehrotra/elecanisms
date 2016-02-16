@@ -24,7 +24,7 @@
 
 #define REG_MAG_ADDR        0x3FFE
 
-uint16_t val1, val2;
+uint16_t val1, val2,revs;
 
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
 _PIN *ENC_NCS;
@@ -59,12 +59,20 @@ WORD enc_readReg(WORD address) {
 void resultMath(uint16_t result) {
     uint16_t temp; 
     uint16_t degree;
-    printf("%i\n\r", ~((result >> 15) & 1));
+    printf("Print Result: %i\n\r", result);
+    // printf("%u\n\r", (result >> 15));
+    // printf("%u\n\r", (result >> 15) & (uint8_t)01);
     if(~((result >> 15) & 1)) {
-        temp = result & 0011111111111111;
-        temp = temp << 2; 
-        degree = (temp * 360)/(1<<14);
-        printf("%i\n\r", degree);
+        temp = result & 16383;
+        printf("%u\n\r", temp);
+
+
+        //temp = temp << 2; 
+        //printf("%u\n\r", temp);
+        // degree = (temp * 45);
+        // printf("%u\n\r", degree);
+        // degree = degree/(01<<12);
+        // printf("%u\n\r", degree);
         //return degree;
     }
 
@@ -198,7 +206,6 @@ int16_t main(void) {
 
 
     while (1) {
-
         oc_pwm(&oc1, &D[8], &timer3, freq, duty); 
         oc_pwm(&oc1, &D[6], &timer3, freq, duty); 
         ServiceUSB();                       // service any pending USB requests
