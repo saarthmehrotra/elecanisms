@@ -32,7 +32,7 @@
 uint16_t val1, val2;
 uint16_t revs = 0;
 int16_t prevAngle = 0;
-
+uint8_t pin = 8;
 
 
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
@@ -89,7 +89,7 @@ void resultMath(uint16_t result) {
         // printf("Print Angle: %i\n\r", Angle);
         // printf("Print PrevA: %i\n\r", prevAngle);
         // printf("Print diff: %i\n\r", diff);     
-        // printf("Print revs: %i\n\r", revs);   
+           printf("Print revs: %i\n\r", revs);
         prevAngle = Angle;
 
         //Angle = Angle << 2; 
@@ -103,14 +103,31 @@ void resultMath(uint16_t result) {
 
 }
 
-void calculateDuty(uint16_t controlMode){
-    switch(controlMode)
+uint8_t calculateDuty(uint16_t controlMode){
+    uint8_t duty = 0;
+    printf("Print revs: %i\n\r", revs);
+    switch(controlMode){
         case SPRING:
-            duty = 
+            duty = 0;
         case DAMPER:
+            duty = 0;
         case TEXTURE:
+            duty = 0;
         case WALL:
-
+            if (revs>3){
+                duty = 100;
+                pin = 7;
+            }
+            else if(revs < -3){
+                duty = 100;
+                pin = 8;
+            }
+            else{
+                duty = 0;
+                pin = 8;
+            }
+    return duty;
+    }
 }
 
 
@@ -214,10 +231,10 @@ int16_t main(void) {
     init_oc();
     init_uart();
 
-    float freq = 10000;
-    uint16_t duty = 50;
+    uint16_t freq = 10000;
+    uint8_t duty = 0;
     uint8_t val = 1;
-    uint8_t controlMode = 0
+    uint8_t controlMode = 0;
 
     ENC_MISO = &D[1];
     ENC_MOSI = &D[0];
@@ -225,8 +242,6 @@ int16_t main(void) {
     ENC_NCS = &D[3];
     VOLTAGE0 = &A[0];
 
-    int val1 = 0;
-    int val2 = 0;
 
     // resultMath(0000111100001111); 
 
@@ -246,18 +261,19 @@ int16_t main(void) {
 
 
     while (1) {
-        controlMode = (controlMode+!sw_read(&sw1))%4;
-        calculateDuty(controlMode)
-        oc_pwm(&oc1, &D[8], &timer3, freq, duty); 
-        oc_pwm(&oc1, &D[6], &timer3, freq, duty); 
         ServiceUSB();                       // service any pending USB requests
+        controlMode = (controlMode+!sw_read(&sw1))%4;
+        duty = calculateDuty(controlMode);
+        oc_pwm(&oc1, &D[pin], &timer3, freq, duty); 
+
+
         
-        if (timer_flag(&timer2)) {
-            timer_lower(&timer2);
-            uint16_t voltage0Reading = pin_read(VOLTAGE0);
-            printf("Voltage 0 = %u\n\r", voltage0Reading);
-            led_toggle(&led1);
-        }
+        // if (timer_flag(&timer2)) {
+        //     timer_lower(&timer2);
+        //     uint16_t voltage0Reading = pin_read(VOLTAGE0);
+        //     printf("Voltage 0 = %u\n\r", voltage0Reading);
+        //     led_toggle(&led1);
+        // }
 
 
 
