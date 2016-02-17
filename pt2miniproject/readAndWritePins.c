@@ -11,9 +11,9 @@
 #include "uart.h"
 #include "timer.h"
 
-#define TOGGLE_LED1         1
-#define TOGGLE_LED2         2
-#define READ_SW1            3
+#define TOGGLE_LED1         11
+#define TOGGLE_LED2         12
+#define READ_SW1            13
 #define ENC_WRITE_REG       4
 #define ENC_READ_REG        5
 #define SET_VALS            6
@@ -34,6 +34,7 @@ uint16_t revs = 0;
 int16_t prevAngle = 0;
 uint8_t pin = 8;
 
+uint8_t duty = 0;
 
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
 _PIN *ENC_NCS;
@@ -89,7 +90,7 @@ void resultMath(uint16_t result) {
         // printf("Print Angle: %i\n\r", Angle);
         // printf("Print PrevA: %i\n\r", prevAngle);
         // printf("Print diff: %i\n\r", diff);     
-           printf("Print revs: %i\n\r", revs);
+           printf("Print revs1: %i\n\r", revs);
         prevAngle = Angle;
 
         //Angle = Angle << 2; 
@@ -103,9 +104,9 @@ void resultMath(uint16_t result) {
 
 }
 
-uint8_t calculateDuty(uint16_t controlMode){
-    uint8_t duty = 0;
-    printf("Print revs: %i\n\r", revs);
+void calculateDuty(uint16_t controlMode){
+
+    printf("Print revs2: %i\n\r", revs);
     switch(controlMode){
         case SPRING:
             duty = 0;
@@ -126,7 +127,7 @@ uint8_t calculateDuty(uint16_t controlMode){
                 duty = 0;
                 pin = 8;
             }
-    return duty;
+
     }
 }
 
@@ -232,7 +233,7 @@ int16_t main(void) {
     init_uart();
 
     uint16_t freq = 10000;
-    uint8_t duty = 0;
+
     uint8_t val = 1;
     uint8_t controlMode = 0;
 
@@ -263,7 +264,7 @@ int16_t main(void) {
     while (1) {
         ServiceUSB();                       // service any pending USB requests
         controlMode = (controlMode+!sw_read(&sw1))%4;
-        duty = calculateDuty(controlMode);
+        calculateDuty(controlMode);
         oc_pwm(&oc1, &D[pin], &timer3, freq, duty); 
 
 
