@@ -30,6 +30,7 @@ int16_t prevAngle = 0;
 
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
 _PIN *ENC_NCS;
+_PIN *VOLTAGE0;
 
 WORD enc_readReg(WORD address) {
     WORD cmd, result;
@@ -61,6 +62,7 @@ WORD enc_readReg(WORD address) {
 void resultMath(uint16_t result) {
     int16_t Angle; 
     int16_t diff;
+
     //printf("Print Result: %i\n\r", result);
     // printf("%u\n\r", (result >> 15));
     // printf("%u\n\r", (result >> 15) & (uint8_t)01);
@@ -78,7 +80,7 @@ void resultMath(uint16_t result) {
         // printf("Print Angle: %i\n\r", Angle);
         // printf("Print PrevA: %i\n\r", prevAngle);
         // printf("Print diff: %i\n\r", diff);     
-        //printf("Print revs: %i\n\r", revs);   
+        // printf("Print revs: %i\n\r", revs);   
         prevAngle = Angle;
 
         //Angle = Angle << 2; 
@@ -192,7 +194,7 @@ int16_t main(void) {
     init_uart();
 
     float freq = 10000;
-    uint16_t duty = 100;
+    uint16_t duty = 50;
     uint8_t val = 1;
 
 
@@ -200,6 +202,7 @@ int16_t main(void) {
     ENC_MOSI = &D[0];
     ENC_SCK = &D[2];
     ENC_NCS = &D[3];
+    VOLTAGE0 = &A[0];
 
     int val1 = 0;
     int val2 = 0;
@@ -209,6 +212,8 @@ int16_t main(void) {
     pin_digitalOut(ENC_NCS);
     pin_set(ENC_NCS);
 
+    timer_setPeriod(&timer2, .9);
+    timer_start(&timer2);
 
     spi_open(&spi1, ENC_MISO, ENC_MOSI, ENC_SCK, 2e6 ,1);
 
@@ -223,6 +228,13 @@ int16_t main(void) {
         oc_pwm(&oc1, &D[8], &timer3, freq, duty); 
         oc_pwm(&oc1, &D[6], &timer3, freq, duty); 
         ServiceUSB();                       // service any pending USB requests
+        
+        if (timer_flag(&timer2)) {
+            timer_lower(&timer2);
+            uint16_t voltage0Reading = pin_read(VOLTAGE0);
+            printf("Voltage 0 = %u\n\r", voltage0Reading);
+            led_toggle(&led1);
+        }
 
 
 
