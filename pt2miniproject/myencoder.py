@@ -10,7 +10,7 @@ ENC_MAG = 0x3FFE
 ENC_ANGLE = 0x3FFF
 print 2**14
 angleList = []
-f = open('data.csv', 'w')
+#f = open('data.csv', 'w')
 while(1):
 
 #	mag = myencoder.enc_readReg(ENC_MAG)

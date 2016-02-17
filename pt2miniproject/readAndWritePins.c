@@ -24,9 +24,17 @@
 
 #define REG_MAG_ADDR        0x3FFE
 
+#define SPRING         1
+#define DAMPER         2
+#define TEXTURE        3
+#define WALL           0
+
 uint16_t val1, val2;
 uint16_t revs = 0;
 int16_t prevAngle = 0;
+uint16_t freq = 10000;
+uint16_t duty = 100;
+
 
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
 _PIN *ENC_NCS;
@@ -54,6 +62,8 @@ WORD enc_readReg(WORD address) {
     return result;
 
 }
+
+
 
 //TOREAD ON SCREEN run
 // screen /dev/ttyUSB0 19200
@@ -91,6 +101,18 @@ void resultMath(uint16_t result) {
     }
 
 }
+
+void calculateDuty(uint16_t controlMode){
+    switch(controlMode)
+        case SPRING:
+            duty = 
+        case DAMPER:
+        case TEXTURE:
+        case WALL:
+
+}
+
+
 
 //void ClassRequests(void) {
 //    switch (USB_setup.bRequest) {
@@ -191,10 +213,8 @@ int16_t main(void) {
     init_oc();
     init_uart();
 
-    float freq = 10000;
-    uint16_t duty = 100;
-    uint8_t val = 1;
 
+    uint8_t controlMode = 0
 
     ENC_MISO = &D[1];
     ENC_MOSI = &D[0];
@@ -220,6 +240,8 @@ int16_t main(void) {
 
 
     while (1) {
+        controlMode = (controlMode+!sw_read(&sw1))%4;
+        calculateDuty(controlMode)
         oc_pwm(&oc1, &D[8], &timer3, freq, duty); 
         oc_pwm(&oc1, &D[6], &timer3, freq, duty); 
         ServiceUSB();                       // service any pending USB requests
