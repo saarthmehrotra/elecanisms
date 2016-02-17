@@ -28,13 +28,14 @@
 #define DAMPER         2
 #define TEXTURE        3
 #define WALL           0
+#define MAXDUTY        65535
 
-uint16_t val1, val2;
-uint16_t revs = 0;
-int16_t prevAngle = 0;
-uint8_t pin = 8;
+volatile uint16_t val1, val2;
+volatile int16_t revs = 0;
+volatile int16_t prevAngle = 0;
 
-uint8_t duty = 0;
+volatile uint16_t duty7 = 0;
+volatile uint16_t duty8 = 0;
 
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
 _PIN *ENC_NCS;
@@ -90,44 +91,39 @@ void resultMath(uint16_t result) {
         // printf("Print Angle: %i\n\r", Angle);
         // printf("Print PrevA: %i\n\r", prevAngle);
         // printf("Print diff: %i\n\r", diff);     
-           printf("Print revs1: %i\n\r", revs);
+        // printf("Print revs1: %i\n\r", revs);
         prevAngle = Angle;
 
-        //Angle = Angle << 2; 
-        //printf("%u\n\r", Angle);
-        // degree = (Angle * 45);
-        // printf("%u\n\r", degree);
-        // degree = degree/(01<<12);
-        // printf("%u\n\r", degree);
-        //return degree;
     }
 
 }
 
 void calculateDuty(uint16_t controlMode){
 
-    printf("Print revs2: %i\n\r", revs);
+    //printf("Print revs2: %i\n\r", revs);
     switch(controlMode){
         case SPRING:
-            duty = 0;
+            duty7 = 0;
+            break;
         case DAMPER:
-            duty = 0;
+            duty7 = 0;
+            break;
         case TEXTURE:
-            duty = 0;
+            duty7 = 0;
+            break;
         case WALL:
-            if (revs>3){
-                duty = 100;
-                pin = 7;
+            if (revs>10){
+                duty7 = MAXDUTY;
+                duty8 = 0;
             }
-            else if(revs < -3){
-                duty = 100;
-                pin = 8;
+            else if(revs < (0-10)){
+                duty7 = 0;
+                duty8 = MAXDUTY;
             }
             else{
-                duty = 0;
-                pin = 8;
+                duty7 = 0;
+                duty8 = 0;
             }
-
     }
 }
 
@@ -232,7 +228,7 @@ int16_t main(void) {
     init_oc();
     init_uart();
 
-    uint16_t freq = 10000;
+    float freq = 10000;
 
     uint8_t val = 1;
     uint8_t controlMode = 0;
@@ -249,10 +245,13 @@ int16_t main(void) {
     pin_digitalOut(ENC_NCS);
     pin_set(ENC_NCS);
 
-    timer_setPeriod(&timer2, .9);
+    timer_setPeriod(&timer2, .05);
     timer_start(&timer2);
 
     spi_open(&spi1, ENC_MISO, ENC_MOSI, ENC_SCK, 2e6 ,1);
+
+    oc_pwm(&oc1, &D[7], NULL, freq, 0); 
+    oc_pwm(&oc2, &D[8], NULL, freq, 0); 
 
     InitUSB();                              // initialize the USB registers and serial interface engine
     while (USB_USWSTAT!=CONFIG_STATE) {     // while the peripheral is not configured...
@@ -262,19 +261,29 @@ int16_t main(void) {
 
 
     while (1) {
+
+        //controlMode = (controlMode+~sw_read(&sw1))%4;
+        //printf("controlMode:%u\n\t",controlMode );
+        //calculateDuty(controlMode);
+        //pin_write(&D[pin], duty);
         ServiceUSB();                       // service any pending USB requests
-        controlMode = (controlMode+!sw_read(&sw1))%4;
-        calculateDuty(controlMode);
-        oc_pwm(&oc1, &D[pin], &timer3, freq, duty); 
 
 
-        
-        // if (timer_flag(&timer2)) {
-        //     timer_lower(&timer2);
+        if (timer_flag(&timer2)) {
+            timer_lower(&timer2);
+            controlMode = WALL;
+            calculateDuty(controlMode);
+            pin_write(&D[7], duty7);
+            pin_write(&D[8], duty8); 
+
+            printf("duty7:%u\n\r",duty7);
+            printf("duty8:%u\n\r",duty8);
+            printf("Print revs1: %i\n\r", revs);
+
         //     uint16_t voltage0Reading = pin_read(VOLTAGE0);
         //     printf("Voltage 0 = %u\n\r", voltage0Reading);
-        //     led_toggle(&led1);
-        // }
+             led_toggle(&led1);
+        }
 
 
 
