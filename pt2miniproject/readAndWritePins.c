@@ -142,13 +142,21 @@ void calculateDuty(uint16_t controlMode){
             break;
 
         case TEXTURE:
-            if (revs > 1){
-                duty7 = MAXDUTY-22000;
+            if (revs > 1 && revs < wallDistance){
+                duty7 = MAXDUTY-24000;
                 duty8 = 0;
             }
-            else if(revs < -1) {
+            else if(revs < -1 && revs > -wallDistance) {
                 duty7 = 0;
-                duty8 = MAXDUTY-22000;   
+                duty8 = MAXDUTY-24000;   
+            }
+            else if (revs>wallDistance){
+                duty7 = MAXDUTY;
+                duty8 = 0;
+            }
+            else if(revs < -wallDistance){
+                duty7 = 0;
+                duty8 = MAXDUTY;
             }
             else{
                 duty7 = 0;
