@@ -5,9 +5,9 @@ import time
 class encodertest:
 
     def __init__(self):
-        self.TOGGLE_LED1 = 1
-        self.TOGGLE_LED2 = 2
-        self.READ_SW1 = 3
+        self.TOGGLE_LED1 = 11
+        self.TOGGLE_LED2 = 12
+        self.READ_SW1 = 13
         self.ENC_READ_REG = 5
         self.TOGGLE_LED3 = 8
         self.READ_SW2 = 9
