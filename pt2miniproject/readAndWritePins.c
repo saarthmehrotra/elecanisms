@@ -36,6 +36,10 @@ volatile int16_t prevAngle = 0;
 
 volatile uint16_t duty7 = 0;
 volatile uint16_t duty8 = 0;
+volatile uint16_t voltage0Reading = 0;
+volatile uint8_t forward = 1;
+volatile uint8_t backword= 0;
+volatile uint8_t counter = 0;
 
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
 _PIN *ENC_NCS;
@@ -105,7 +109,32 @@ void calculateDuty(uint16_t controlMode){
 
     switch(controlMode){
         case SPRING:
-            duty7 = 0;
+            if (revs>0){
+                duty7 = MAXDUTY-counter*3000;
+                duty8 = 0;
+                if (forward){
+                    backword = 0;
+                }
+                else{
+                    backword = 1;
+                    counter++;
+                }
+            }
+            else if(revs < 0){
+                duty7 = 0;
+                duty8 = MAXDUTY-counter*3000;
+                if (backword){
+                    forward = 0;
+                }
+                else{
+                    forward = 1;
+                    counter++;
+                }
+            }
+            else{
+                duty7 = 0;
+                duty8 = 0;
+            }
             break;
         case DAMPER:
             duty7 = 0;
@@ -273,18 +302,27 @@ int16_t main(void) {
 
         if (timer_flag(&timer2)) {
             timer_lower(&timer2);
-            controlMode = WALL;
+            controlMode = SPRING;
             calculateDuty(controlMode);
             pin_write(&D[7], duty7);
             pin_write(&D[8], duty8); 
 
-            printf("duty7:%u\n\r",duty7);
-            printf("duty8:%u\n\r",duty8);
-            printf("Print revs1: %i\n\r", revs);
+            // printf("duty7:%u\n\r",duty7);
+            // printf("duty8:%u\n\r",duty8);
+            //
 
-        //     uint16_t voltage0Reading = pin_read(VOLTAGE0);
-        //     printf("Voltage 0 = %u\n\r", voltage0Reading);
-             led_toggle(&led1);
+
+
+
+            printf("Print revs1: %i\n\r", revs);
+            printf("Duty7 = %u\n\r",duty8);
+            printf("Duty8 = %u\n\r",duty7);
+            voltage0Reading = 33000-pin_read(VOLTAGE0);
+
+            printf("Voltage 0 = %u\n\r", voltage0Reading);
+
+
+            led_toggle(&led1);
         }
 
 
