@@ -92,20 +92,13 @@ void resultMath(uint16_t result) {
            printf("Print revs: %i\n\r", revs);
         prevAngle = Angle;
 
-        //Angle = Angle << 2; 
-        //printf("%u\n\r", Angle);
-        // degree = (Angle * 45);
-        // printf("%u\n\r", degree);
-        // degree = degree/(01<<12);
-        // printf("%u\n\r", degree);
-        //return degree;
     }
 
 }
 
 uint8_t calculateDuty(uint16_t controlMode){
     uint8_t duty = 0;
-    printf("Print revs: %i\n\r", revs);
+    printf("Print revs1: %i\n\r", revs);
     switch(controlMode){
         case SPRING:
             duty = 0;
