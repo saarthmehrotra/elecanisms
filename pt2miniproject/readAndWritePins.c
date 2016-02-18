@@ -98,15 +98,11 @@ void resultMath(uint16_t result) {
 
 }
 
-<<<<<<< HEAD
-uint8_t calculateDuty(uint16_t controlMode){
-    uint8_t duty = 0;
-    printf("Print revs1: %i\n\r", revs);
-=======
+
 void calculateDuty(uint16_t controlMode){
 
     //printf("Print revs2: %i\n\r", revs);
->>>>>>> 77f8eba3c6a0e109599ff2d496de8dd528876f8e
+
     switch(controlMode){
         case SPRING:
             duty7 = 0;
