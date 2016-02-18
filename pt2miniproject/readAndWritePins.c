@@ -158,7 +158,19 @@ void calculateDuty(uint16_t controlMode){
     }
 }
 
-
+void drawCar(void){
+    int i,j;
+    printf("|"); 
+    for(i=0;i<(10+revs);i++){
+        printf("_");
+    }
+    printf("*");
+    for(j=0;j<(10-revs);j++){
+        printf("_");
+    }
+    printf("|");
+    printf("%i\n\r", revs);
+}
 
 //void ClassRequests(void) {
 //    switch (USB_setup.bRequest) {
@@ -302,11 +314,11 @@ int16_t main(void) {
 
         if (timer_flag(&timer2)) {
             timer_lower(&timer2);
-            controlMode = SPRING;
+            controlMode = WALL;
             calculateDuty(controlMode);
             pin_write(&D[7], duty7);
             pin_write(&D[8], duty8); 
-
+            drawCar();
             // printf("duty7:%u\n\r",duty7);
             // printf("duty8:%u\n\r",duty8);
             //
@@ -314,12 +326,12 @@ int16_t main(void) {
 
 
 
-            printf("Print revs1: %i\n\r", revs);
-            printf("Duty7 = %u\n\r",duty8);
-            printf("Duty8 = %u\n\r",duty7);
-            voltage0Reading = 33000-pin_read(VOLTAGE0);
+            // printf("Print revs1: %i\n\r", revs);
+            // printf("Duty7 = %u\n\r",duty8);
+            // printf("Duty8 = %u\n\r",duty7);
+            // voltage0Reading = 33000-pin_read(VOLTAGE0);
 
-            printf("Voltage 0 = %u\n\r", voltage0Reading);
+            // printf("Voltage 0 = %u\n\r", voltage0Reading);
 
 
             led_toggle(&led1);
