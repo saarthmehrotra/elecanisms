@@ -40,6 +40,7 @@ volatile uint16_t voltage0Reading = 0;
 volatile uint8_t forward = 1;
 volatile uint8_t backword= 0;
 volatile uint8_t counter = 0;
+volatile uint8_t wallDistance = 6;
 
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
 _PIN *ENC_NCS;
@@ -139,15 +140,28 @@ void calculateDuty(uint16_t controlMode){
         case DAMPER:
             duty7 = 0;
             break;
+
         case TEXTURE:
-            duty7 = 0;
+            if (revs > 1){
+                duty7 = MAXDUTY-22000;
+                duty8 = 0;
+            }
+            else if(revs < -1) {
+                duty7 = 0;
+                duty8 = MAXDUTY-22000;   
+            }
+            else{
+                duty7 = 0;
+                duty8 = 0;
+            }
             break;
+
         case WALL:
-            if (revs>10){
+            if (revs>wallDistance){
                 duty7 = MAXDUTY;
                 duty8 = 0;
             }
-            else if(revs < (0-10)){
+            else if(revs < (0 - wallDistance)){
                 duty7 = 0;
                 duty8 = MAXDUTY;
             }
@@ -158,19 +172,79 @@ void calculateDuty(uint16_t controlMode){
     }
 }
 
-void drawCar(void){
-    int i,j;
-    printf("|"); 
-    for(i=0;i<(10+revs);i++){
-        printf("_");
+void drawCar(controlMode){
+    if(controlMode == WALL){
+        int i,j;
+        printf("|"); 
+        for(i=0;i<(wallDistance+revs);i++){
+            printf("_");
+        }
+        printf("*");
+        for(j=0;j<(wallDistance-revs);j++){
+            printf("_");
+        }
+        printf("|");
+        printf("%i\n\r", revs);
     }
-    printf("*");
-    for(j=0;j<(10-revs);j++){
-        printf("_");
+
+  else if(controlMode == TEXTURE){
+    int k,l,m,n,o,p,q;
+    printf("|"); 
+    if (revs < -1){
+        for(k=0;k<(wallDistance + revs);k++){
+            printf(" > ");
+        }    
+        printf(" * ");
+        for(l=0;l<(abs(revs) - 2);l++){
+            printf(" > ");
+        }
+        printf(" _ _ _ ");
+        for(k=0;k<(wallDistance - 1 );k++){
+            printf(" < ");
+        }
+        printf("|");
+        printf("%i\n\r", revs);
+    }
+    else if(revs == -1 || revs == 0 || revs == 1){
+        for(n=0;n<(wallDistance - 1);n++){
+            printf(" > ");
+        }
+        if(revs == -1){
+            printf(" * _ _ ");
+        }
+        else if(revs == 0){
+            printf(" _ * _ ");
+        }
+        else if(revs == 1){
+            printf(" _ _ * ");
+        }
+        for(q=0;q<(wallDistance - 1 );q++){
+            printf(" < ");
+        }
+        printf("|");
+        printf("%i\n\r", revs);
+    }
+    else{
+        for(n=0;n<(wallDistance - 1 );n++){
+            printf(" > ");
+        }
+        printf(" _ _ _ "); 
+        for(o=0;o<(revs - 2);o++){
+            printf(" < ");
+        }
+        printf(" * ");
+        for(p=0;p<(wallDistance - revs);p++){
+            printf(" < ");
     }
     printf("|");
     printf("%i\n\r", revs);
+  } 
+  }
+  else{
+
+  } 
 }
+
 
 //void ClassRequests(void) {
 //    switch (USB_setup.bRequest) {
@@ -314,18 +388,14 @@ int16_t main(void) {
 
         if (timer_flag(&timer2)) {
             timer_lower(&timer2);
-            controlMode = WALL;
+            controlMode = TEXTURE;
             calculateDuty(controlMode);
             pin_write(&D[7], duty7);
             pin_write(&D[8], duty8); 
-            drawCar();
+            drawCar(controlMode);
             // printf("duty7:%u\n\r",duty7);
             // printf("duty8:%u\n\r",duty8);
-            //
-
-
-
-
+   
             // printf("Print revs1: %i\n\r", revs);
             // printf("Duty7 = %u\n\r",duty8);
             // printf("Duty8 = %u\n\r",duty7);
