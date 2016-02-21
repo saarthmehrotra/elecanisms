@@ -28,7 +28,7 @@ while(1):
 	z = raw_input("Press 1 to Change pConstant and 2 to change iConstant")
 	if z == 1:
 		x = input("Enter pConstant Value (0 to 255):")
-	if z == 2:
+	if z ==
 		y = input("Enter iConstant Value (1/x and x = 0 to 16):")
 
 	myencoder.set_vals(x,y)
