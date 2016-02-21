@@ -34,7 +34,7 @@
 volatile uint16_t val1, val2;
 volatile int16_t revs = 0;
 volatile int16_t prevAngle = 0;
-
+volatile int16_t Angle=0; 
 volatile uint16_t duty7 = 0;
 volatile uint16_t duty8 = 0;
 volatile uint16_t voltage0Reading = 0;
@@ -42,6 +42,10 @@ volatile uint8_t forward = 1;
 volatile uint8_t backword= 0;
 volatile uint8_t counter = 0;
 volatile uint8_t wallDistance = 6;
+volatile uint8_t pullBack = 0;
+volatile int8_t springRevs = 0;
+volatile int8_t springAngle = 0;
+volatile uint8_t cumulativeSpring = 0;
 
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
 _PIN *ENC_NCS;
@@ -77,7 +81,7 @@ WORD enc_readReg(WORD address) {
 // screen /dev/ttyUSB0 19200
 
 void resultMath(uint16_t result) {
-    int16_t Angle; 
+
     int16_t diff;
 
     //printf("Print Result: %i\n\r", result);
@@ -111,32 +115,53 @@ void calculateDuty(uint16_t controlMode){
 
     switch(controlMode){
         case SPRING:
-            if (revs>0){
-                duty7 = MAXDUTY-counter*3000;
-                duty8 = 0;
-                if (forward){
-                    backword = 0;
+            if (pullBack == 0) {
+                duty7 = MAXDUTY;
+                if ((voltage0Reading-25000)<0){
+                    pullBack = 0;
                 }
                 else{
-                    backword = 1;
-                    counter++;
+
+                    pullBack = 1;
+                    springRevs = 0-revs;
+                    springAngle = springRevs*256-Angle/256;
                 }
+
             }
-            else if(revs < 0){
-                duty7 = 0;
-                duty8 = MAXDUTY-counter*3000;
-                if (backword){
-                    forward = 0;
+            else {
+                springRevs = springRevs + revs;
+                springAngle = (springRevs*256)+(Angle/256);
+                if (springRevs>0){
+                    duty7 = MAXDUTY-cumulativeSpring;
+                    duty8 = 0;
+                    if (forward){
+                        backword = 0;
+                    }
+                    else{
+                        backword = 1;
+                        counter++;
+                    }
+                }
+                else if(springRevs < 0){
+                    duty7 = 0;
+                    duty8 = MAXDUTY-cumulativeSpring;
+                    if (backword){
+                        forward = 0;
+                    }
+                    else{
+                        forward = 1;
+                        counter++;
+                    }
                 }
                 else{
-                    forward = 1;
-                    counter++;
+                    duty7 = 0;
+                    duty8 = 0;
                 }
+
             }
-            else{
-                duty7 = 0;
-                duty8 = 0;
-            }
+            cumulativeSpring = cumulativeSpring+abs(springAngle);
+
+
             break;
         case DAMPER:
             duty7 = 0;
@@ -397,20 +422,25 @@ int16_t main(void) {
 
         if (timer_flag(&timer2)) {
             timer_lower(&timer2);
-            controlMode = TEXTURE;
+            controlMode = SPRING;
             calculateDuty(controlMode);
             pin_write(&D[7], duty7);
             pin_write(&D[8], duty8); 
-            drawCar(controlMode);
+            voltage0Reading = pin_read(VOLTAGE0);
+
+            //drawCar(controlMode);
             // printf("duty7:%u\n\r",duty7);
             // printf("duty8:%u\n\r",duty8);
    
             // printf("Print revs1: %i\n\r", revs);
-            // printf("Duty7 = %u\n\r",duty8);
-            // printf("Duty8 = %u\n\r",duty7);
-            // voltage0Reading = 33000-pin_read(VOLTAGE0);
+            printf("Duty7 = %u\n\r",duty8);
+            printf("Duty8 = %u\n\r",duty7);
 
-            // printf("Voltage 0 = %u\n\r", voltage0Reading);
+            printf("springRevs = %i\n\r",springRevs);
+            printf("springAngle = %i\n\r",springAngle);
+            printf("pullBack = %u\n\r",pullBack);
+
+            printf("Voltage 0 = %u\n\r", voltage0Reading);
 
 
             led_toggle(&led1);
