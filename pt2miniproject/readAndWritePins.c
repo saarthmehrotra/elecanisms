@@ -346,11 +346,11 @@ void VendorRequests(void) {
             BD[EP0IN].bytecount = 4;    // set EP0 IN byte count to 4
             BD[EP0IN].status = 0xC8;    // send packet as DATA1, set UOWN bit
             break;            
-        // case PRINT_VALS:
-        //     printf("val1 = %u, val2 = %u\n", val1, val2);
-        //     BD[EP0IN].bytecount = 0;    // set EP0 IN byte count to 0
-        //     BD[EP0IN].status = 0xC8;    // send packet as DATA1, set UOWN bit
-        //     break;
+        case PRINT_VALS:
+            printf("val1 = %u, val2 = %u\n", val1, val2);
+            BD[EP0IN].bytecount = 0;    // set EP0 IN byte count to 0
+            BD[EP0IN].status = 0xC8;    // send packet as DATA1, set UOWN bit
+            break;
         default:
             USB_error_flags |= 0x01;    // set Request Error Flag
     }
@@ -408,8 +408,6 @@ int16_t main(void) {
     while (USB_USWSTAT!=CONFIG_STATE) {     // while the peripheral is not configured...
         ServiceUSB();                       // ...service USB requests
     }
-
-
 
     while (1) {
 
