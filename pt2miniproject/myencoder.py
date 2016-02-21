@@ -2,6 +2,10 @@ import encodertest as encoder
 import struct
 import time
 import csv
+import hellousb as usb1
+import time
+
+myusb = usb1.hellousb()
 
 myencoder = encoder.encodertest()
 myencoder.toggle_led2()
@@ -18,7 +22,9 @@ while(1):
 #	mag = bin(mag)[2:]
 #	print mag
 
-
+	time.sleep(1)
+	myusb.set_vals(5,3)
+	print myusb.get_vals()
 	pack = myencoder.enc_readReg(ENC_ANGLE)
 
 
