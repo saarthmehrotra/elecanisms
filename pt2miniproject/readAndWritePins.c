@@ -42,6 +42,8 @@ volatile uint8_t wallDistance = 6;
 volatile int16_t totalAngle=0; 
 volatile uint16_t cumalativeAngle=0; 
 volatile int16_t iConstant, pConstant, dConstant;
+volatile int8_t direction;
+volatile int16_t diff = 0;
 
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
 _PIN *ENC_NCS;
@@ -78,7 +80,7 @@ WORD enc_readReg(WORD address) {
 
 void resultMath(uint16_t result) {
 
-    int16_t diff;
+
 
     //printf("Print Result: %i\n\r", result);
     // printf("%u\n\r", (result >> 15));
@@ -127,14 +129,31 @@ void calculateDuty(uint16_t controlMode){
                 duty7 = 0;
                 duty8 = 0;
             }
-
-
             break;
 
 
 
         case DAMPER:
-            duty7 = 0;
+
+            if(abs(diff)<=5000){
+                if (diff>10){
+                    duty8 = 40000+abs(diff)*30;
+                    duty7 = 0;
+                }
+                else if (diff<-10){
+                    duty7 = 40000+abs(diff)*30;
+                    duty8 = 0;
+                } 
+                else{
+                    duty7 = 0;
+                    duty8 = 0;
+                }
+            }
+            //rework if breaks while in damper
+            // else{
+
+            // }
+
             break;
 
         case TEXTURE:
@@ -391,7 +410,7 @@ int16_t main(void) {
         if (timer_flag(&timer2)) {
             timer_lower(&timer2);
             // voltage0Reading = pin_read(VOLTAGE0);
-            controlMode = SPRING;
+            controlMode = DAMPER;
             calculateDuty(controlMode);
             pin_write(&D[7], duty7);
             pin_write(&D[8], duty8); 
@@ -402,8 +421,11 @@ int16_t main(void) {
             // printf("duty8:%u\n\r",duty8);
             //printf("Voltage 0 = %u\n\r", voltage0Reading);
 
-            printf("totalAngle: %u\n\r", totalAngle);
-            printf("cumalativeAngle: %u\n\r", cumalativeAngle);
+
+            //printf("cumalativeAngle: %u\n\r", cumalativeAngle);
+            //printf("totalAngle: %u\n\r", totalAngle);
+
+            printf("diff: %i\n\r", diff);
             printf("Duty7 = %u\n\r",duty8);
             printf("Duty8 = %u\n\r",duty7);
             

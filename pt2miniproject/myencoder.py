@@ -2,10 +2,8 @@ import encodertest as encoder
 import struct
 import time
 import csv
-import hellousb as usb1
 import time
 
-myusb = usb1.hellousb()
 
 myencoder = encoder.encodertest()
 myencoder.toggle_led2()
@@ -22,9 +20,9 @@ while(1):
 #	mag = bin(mag)[2:]
 #	print mag
 
-	time.sleep(1)
-	myusb.set_vals(5,3)
-	print myusb.get_vals()
+	# time.sleep(1)
+	# myencoder.set_vals(5,3)
+	# print myencoder.get_vals()
 	pack = myencoder.enc_readReg(ENC_ANGLE)
 
 
@@ -37,9 +35,9 @@ while(1):
 	intAngle = int(binAngle,2)
 	#print "int = ",angle
 	angle = (intAngle*360.0)/(2**14)
-	if binAngleOrig[3] == "0":
+	#if binAngleOrig[3] == "0":
 		#print "angle = ", angle, "  intAngle = ", intAngle, "   binAngle = ", binAngle, "   binAngleTruncated = ", binAngleOrig[4:], "   binAngleOrig = ", binAngleOrig, "   origAngle = ", origAngle 
-		print angle
+		#print angle
 		#time.sleep(1)
 		#f.write(str(angle)+',')
 	# angleList.append(angle)
