@@ -4,6 +4,7 @@ import time
 import csv
 import time
 
+
 myencoder = encoder.encodertest()
 myencoder.toggle_led2()
 myencoder.toggle_led1()
@@ -19,6 +20,9 @@ while(1):
 #	mag = bin(mag)[2:]
 #	print mag
 # 	time.sleep(1)
+
+
+
 # 	totalAngle = revs*256+Angle/256;
 # 	cumalativeAngle = cumalativeAngle + abs(totalAngle)/4;
 #  	uint16_t pidDuty = MAXDUTY - cumalativeAngle/iConstant - pConstant*totalAngle - dConstant*abs(Angle-prevAngle)/256;
@@ -45,9 +49,9 @@ while(1):
 	intAngle = int(binAngle,2)
 	#print "int = ",angle
 	angle = (intAngle*360.0)/(2**14)
-	if binAngleOrig[3] == "0":
+	#if binAngleOrig[3] == "0":
 		#print "angle = ", angle, "  intAngle = ", intAngle, "   binAngle = ", binAngle, "   binAngleTruncated = ", binAngleOrig[4:], "   binAngleOrig = ", binAngleOrig, "   origAngle = ", origAngle 
-		print angle
+		#print angle
 		#time.sleep(1)
 		#f.write(str(angle)+',')
 	# angleList.append(angle)
