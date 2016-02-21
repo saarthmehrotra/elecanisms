@@ -17,10 +17,11 @@
 #define ENC_WRITE_REG       4
 #define ENC_READ_REG        5
 #define SET_VALS            6
-#define GET_VALS
+#define GET_VALS            7
 #define TOGGLE_LED3         8 
 #define READ_SW2            9
 #define READ_SW3            10
+#define PRINT_VALS          14
 
 #define REG_MAG_ADDR        0x3FFE
 
@@ -254,12 +255,12 @@ void drawCar(controlMode){
 }
 
 
-//void ClassRequests(void) {
-//    switch (USB_setup.bRequest) {
-//        default:
-//            USB_error_flags |= 0x01;                    // set Request Error Flag
-//    }
-//}
+void ClassRequests(void) {
+   switch (USB_setup.bRequest) {
+       default:
+           USB_error_flags |= 0x01;                    // set Request Error Flag
+   }
+}
 
 void VendorRequests(void) {
     WORD32 address;
@@ -304,22 +305,27 @@ void VendorRequests(void) {
             BD[EP0IN].bytecount = 1;         // set EP0 IN byte count to 1
             BD[EP0IN].status = 0xC8;         // send packet as DATA1, set UOWN bit
             break;
-        // case SET_VALS:
-        //     val1 = USB_setup.wValue.w;
-        //     val2 = USB_setup.wIndex.w;
-        //     BD[EP0IN].bytecount = 0;    // set EP0 IN byte count to 0 
+        case SET_VALS:
+            val1 = USB_setup.wValue.w;
+            val2 = USB_setup.wIndex.w;
+            BD[EP0IN].bytecount = 0;    // set EP0 IN byte count to 0 
+            BD[EP0IN].status = 0xC8;    // send packet as DATA1, set UOWN bit
+            break;
+        case GET_VALS:
+            temp.w = val1;
+            BD[EP0IN].address[0] = temp.b[0];
+            BD[EP0IN].address[1] = temp.b[1];
+            temp.w = val2;
+            BD[EP0IN].address[2] = temp.b[0];
+            BD[EP0IN].address[3] = temp.b[1];
+            BD[EP0IN].bytecount = 4;    // set EP0 IN byte count to 4
+            BD[EP0IN].status = 0xC8;    // send packet as DATA1, set UOWN bit
+            break;            
+        // case PRINT_VALS:
+        //     printf("val1 = %u, val2 = %u\n", val1, val2);
+        //     BD[EP0IN].bytecount = 0;    // set EP0 IN byte count to 0
         //     BD[EP0IN].status = 0xC8;    // send packet as DATA1, set UOWN bit
         //     break;
-        // case GET_VALS:
-        //     temp.w = val1;
-        //     BD[EP0IN].address[0] = temp.b[0];
-        //     BD[EP0IN].address[1] = temp.b[1];
-        //     temp.w = val2;
-        //     BD[EP0IN].address[2] = temp.b[0];
-        //     BD[EP0IN].address[3] = temp.b[1];
-        //     BD[EP0IN].bytecount = 4;    // set EP0 IN byte count to 4
-        //     BD[EP0IN].status = 0xC8;    // send packet as DATA1, set UOWN bit
-        //     break;        
         default:
             USB_error_flags |= 0x01;    // set Request Error Flag
     }
@@ -333,15 +339,10 @@ void VendorRequestsIn(void) {
 }
 
 void VendorRequestsOut(void) {
-//    WORD32 address;
-//
-//    switch (USB_request.setup.bRequest) {
-//        case ENC_WRITE_REGS:
-//            enc_writeRegs(USB_request.setup.wValue.b[0], BD[EP0OUT].address, USB_request.setup.wLength.b[0]);
-//            break;
-//        default:
-//            USB_error_flags |= 0x01;                    // set Request Error Flag
-//    }
+    switch (USB_request.setup.bRequest) {
+        default:
+            USB_error_flags |= 0x01;                    // set Request Error Flag
+    }
 }
 
 int16_t main(void) {
