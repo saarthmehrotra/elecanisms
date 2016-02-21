@@ -31,7 +31,7 @@
 #define WALL           0
 #define MAXDUTY        65535
 
-volatile uint16_t val1, val2;
+volatile int16_t val1, val2;
 volatile int16_t revs = 0;
 volatile int16_t prevAngle = 0;
 volatile int16_t Angle=0; 
@@ -114,8 +114,8 @@ void calculateDuty(uint16_t controlMode){
     switch(controlMode){
         case SPRING:
             totalAngle = revs*256+Angle/256;
-            cumalativeAngle = cumalativeAngle + abs(totalAngle);
-            uint16_t pidDuty = MAXDUTY - iConstant*cumalativeAngle - pConstant*totalAngle - dConstant*abs(Angle-prevAngle)/256;
+            cumalativeAngle = cumalativeAngle + abs(totalAngle)/4;
+            uint16_t pidDuty = MAXDUTY - cumalativeAngle/iConstant - pConstant*totalAngle - dConstant*abs(Angle-prevAngle)/256;
             if(totalAngle>30){
                 duty7 = pidDuty;
                 duty8 = 0;
@@ -409,6 +409,10 @@ int16_t main(void) {
 
         if (timer_flag(&timer2)) {
             timer_lower(&timer2);
+            pConstant = val1;
+            iConstant = val2;
+            dConstant = 0;
+
             // voltage0Reading = pin_read(VOLTAGE0);
             controlMode = DAMPER;
             calculateDuty(controlMode);

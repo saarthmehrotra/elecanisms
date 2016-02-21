@@ -19,10 +19,24 @@ while(1):
 #	mag =  struct.unpack('<h',mag)[0]
 #	mag = bin(mag)[2:]
 #	print mag
+# 	time.sleep(1)
 
-	# time.sleep(1)
-	# myencoder.set_vals(5,3)
-	# print myencoder.get_vals()
+
+
+# 	totalAngle = revs*256+Angle/256;
+# 	cumalativeAngle = cumalativeAngle + abs(totalAngle)/4;
+#  	uint16_t pidDuty = MAXDUTY - cumalativeAngle/iConstant - pConstant*totalAngle - dConstant*abs(Angle-prevAngle)/256;
+	x = 1
+	y = 1
+
+	z = raw_input("Press 1 to Change pConstant and 2 to change iConstant")
+	if z == 1:
+		x = input("Enter pConstant Value (0 to 255):")
+	if z == 2:
+		y = input("Enter iConstant Value (1/x and x = 0 to 16):")
+
+	myencoder.set_vals(x,y)
+	print myencoder.get_vals()
 	pack = myencoder.enc_readReg(ENC_ANGLE)
 
 
