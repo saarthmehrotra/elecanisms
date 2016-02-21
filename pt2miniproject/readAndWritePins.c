@@ -112,6 +112,7 @@ void calculateDuty(uint16_t controlMode){
     switch(controlMode){
         case SPRING:
             totalAngle = revs*256+Angle/256;
+            cumalativeAngle = cumalativeAngle + abs(totalAngle);
             uint16_t pidDuty = MAXDUTY - iConstant*cumalativeAngle - pConstant*totalAngle - dConstant*abs(Angle-prevAngle)/256;
             if(totalAngle>30){
                 duty7 = pidDuty;
@@ -126,7 +127,7 @@ void calculateDuty(uint16_t controlMode){
                 duty7 = 0;
                 duty8 = 0;
             }
-            cumalativeAngle = cumalativeAngle + abs(totalAngle);
+
 
             break;
 
