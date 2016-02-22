@@ -4,7 +4,6 @@ import time
 import csv
 import time
 
-
 myencoder = encoder.encodertest()
 myencoder.toggle_led2()
 myencoder.toggle_led1()
@@ -17,6 +16,10 @@ x = input("Enter pConstant Value (0 to 255):")
 
 y = input("Enter iConstant Value (1/x and x = 0 to 16):")
 #f = open('data.csv', 'w')
+
+# x = input("Enter pConstant Value (0 to 255):")
+# y = input("Enter iConstant Value (1/x and x = 0 to 16):")
+
 while(1):
 
 #	mag = myencoder.enc_readReg(ENC_MAG)
@@ -25,17 +28,13 @@ while(1):
 #	print mag
 # 	time.sleep(1)
 
-
-
 # 	totalAngle = revs*256+Angle/256;
 # 	cumalativeAngle = cumalativeAngle + abs(totalAngle)/4;
 #  	uint16_t pidDuty = MAXDUTY - cumalativeAngle/iConstant - pConstant*totalAngle - dConstant*abs(Angle-prevAngle)/256;
 
 
-
-
-	myencoder.set_vals(x,y)
-	print myencoder.get_vals()
+	# myencoder.set_vals(x,y)
+	# print myencoder.get_vals()
 	pack = myencoder.enc_readReg(ENC_ANGLE)
 
 

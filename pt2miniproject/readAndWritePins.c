@@ -355,12 +355,14 @@ void VendorRequestsOut(void) {
     }
 }
 
-void service1(_TIMER *self) {
-    ServiceUSB();                   // serviceUSB
-    led_toggle(&led3);
-    }
 
-int16_t main() {
+//Map USB Interrupt service routine to ServiceUSB()
+void __attribute__((interrupt, auto_psv)) _USB1Interrupt(void) {
+    ServiceUSB();
+}
+
+int16_t main(void) {
+
     init_clock();
     init_ui();
     init_pin();
@@ -396,10 +398,13 @@ int16_t main() {
     oc_pwm(&oc2, &D[8], NULL, freq, 0); 
 
     InitUSB();                              // initialize the USB registers and serial interface engine
+
     while (USB_USWSTAT!=CONFIG_STATE) {     // while the peripheral is not configured...
         ServiceUSB();                       // ...service USB requests
     }
-    timer_every(&timer3, .001,*service1);
+
+    IEC5bits.USB1IE = 1;                    // Enable USB Interrupt
+
 
     while (1) {
 
@@ -414,8 +419,11 @@ int16_t main() {
             timer_lower(&timer2);
 
 
-            pConstant = 5;
-            iConstant = 5;
+
+
+            pConstant = 70;
+            iConstant = 8;
+            dConstant = 0;
 
             // voltage0Reading = pin_read(VOLTAGE0);
             controlMode = SPRING;

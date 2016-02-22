@@ -20,6 +20,7 @@
 
 #define REG_MAG_ADDR        0x3FFE
 
+
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
 _PIN *ENC_NCS;
 
