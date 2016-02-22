@@ -114,40 +114,44 @@ void calculateDuty(){
 
     switch(controlMode){
         case SPRING:
-            //ACTUAL SPRING
-            // totalAngle = revs*256+Angle/256;
-            // cumalativeAngle = cumalativeAngle + abs(totalAngle);
-            // pidDuty = MAXDUTY - cumalativeAngle/val2 - val1*abs(totalAngle);
+            totalAngle = revs*256+Angle/256;
+            cumalativeAngle = cumalativeAngle + abs(totalAngle)/64;
+            pidDuty = 40000 + cumalativeAngle*val2 + val1*abs(totalAngle);
+            if (pidDuty>60000){
+                pidDuty = MAXDUTY;
+                cumalativeAngle = cumalativeAngle  -abs(totalAngle);
+            }
+            //pidDuty = 40000 + val1*abs(totalAngle);
+            if(totalAngle>2000){
+                duty7 = pidDuty;
+                duty8 = 0;
 
-            // if(totalAngle>30){
-            //     duty7 = pidDuty;
+            } 
+            else if (totalAngle<-2000){
+                duty7 = 0;
+                duty8 = pidDuty;
+            }
+            else{
+                duty7 = 0;
+                duty8 = 0;
+            }
+
+
+            //BETTER SPRING BASED ON WALL
+            // wallDistance = 3;
+            // if (revs>wallDistance){
+            //     duty7 = MAXDUTY;
             //     duty8 = 0;
-
-            // } 
-            // else if (totalAngle<-30){
+            // }
+            // else if(revs < (0 - wallDistance)){
             //     duty7 = 0;
-            //     duty8 = pidDuty;
+            //     duty8 = MAXDUTY;
             // }
             // else{
             //     duty7 = 0;
             //     duty8 = 0;
             // }
             // break;
-
-            //BETTER SPRING BASED ON WALL
-            wallDistance = 4;
-            if (revs>wallDistance){
-                duty7 = MAXDUTY;
-                duty8 = 0;
-            }
-            else if(revs < (0 - wallDistance)){
-                duty7 = 0;
-                duty8 = MAXDUTY;
-            }
-            else{
-                duty7 = 0;
-                duty8 = 0;
-            }
 
         case DAMPER:
 
@@ -168,7 +172,7 @@ void calculateDuty(){
             break;
 
         case TEXTURE:
-            wallDistance = val1;
+            wallDistance = 5;
             if (revs > 1 && revs < wallDistance){
                 duty7 = MAXDUTY-24000;
                 duty8 = 0;
@@ -192,7 +196,7 @@ void calculateDuty(){
             break;
 
         case WALL:
-            wallDistance = val1;
+            wallDistance = 5;
             if (revs>wallDistance){
                 duty7 = MAXDUTY;
                 duty8 = 0;
@@ -444,7 +448,7 @@ int16_t main(void) {
             pin_write(&D[8], duty8); 
 
 
-            drawCar(controlMode);
+            //drawCar(controlMode);
             // printf("duty7:%u\n\r",duty7);
             // printf("duty8:%u\n\r",duty8);
             //printf("Voltage 0 = %u\n\r", voltage0Reading);
@@ -452,11 +456,11 @@ int16_t main(void) {
 
             //printf("cumalativeAngle: %u\n\r", cumalativeAngle);
             //printf("totalAngle: %u\n\r", totalAngle);
-            //printf("pidDuty: %i\n\r",pidDuty);
-            // printf("Duty7 = %u\n\r",totalAngle);
-            // printf("Duty8 = %u\n\r",cumalativeAngle);
-            //printf("Duty7 = %u\n\r",duty8);
-            //printf("Duty8 = %u\n\r",duty7);
+            printf("pidDuty: %u\n\r",pidDuty);
+            printf("totalAngle = %i\n\r",totalAngle);
+            printf("cumAngle = %u\n\r",cumalativeAngle);
+            printf("Duty7 = %u\n\r",duty8);
+            printf("Duty8 = %u\n\r",duty7);
 
             led_toggle(&led1);
         }
