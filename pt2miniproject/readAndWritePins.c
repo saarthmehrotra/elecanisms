@@ -14,7 +14,6 @@
 #define TOGGLE_LED1         11
 #define TOGGLE_LED2         12
 #define READ_SW1            13
-#define ENC_WRITE_REG       4
 #define ENC_READ_REG        5
 #define SET_VALS            6
 #define GET_VALS            7
@@ -31,7 +30,8 @@
 #define WALL           0
 #define MAXDUTY        65535
 
-volatile int16_t val1, val2;
+volatile uint16_t val1 = 1;
+volatile uint16_t val2 = 1;
 volatile int16_t revs = 0;
 volatile int16_t prevAngle = 0;
 volatile int16_t Angle=0; 
@@ -45,6 +45,7 @@ volatile int8_t iConstant = 1;
 volatile int8_t pConstant = 1;
 volatile int16_t diff = 0;
 volatile uint16_t pidDuty;
+volatile uint8_t controlMode;
 
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
 _PIN *ENC_NCS;
@@ -108,40 +109,55 @@ void resultMath(uint16_t result) {
 }
 
 
-void calculateDuty(uint16_t controlMode){
+void calculateDuty(){
 
 
     switch(controlMode){
         case SPRING:
+            //ACTUAL SPRING
+            // totalAngle = revs*256+Angle/256;
+            // cumalativeAngle = cumalativeAngle + abs(totalAngle);
+            // pidDuty = MAXDUTY - cumalativeAngle/val2 - val1*abs(totalAngle);
 
-            totalAngle = revs*256+Angle/256;
-            cumalativeAngle = cumalativeAngle + abs(totalAngle);
-            pidDuty = MAXDUTY - cumalativeAngle/iConstant - pConstant*abs(totalAngle);
+            // if(totalAngle>30){
+            //     duty7 = pidDuty;
+            //     duty8 = 0;
 
-            if(totalAngle>30){
-                duty7 = pidDuty;
+            // } 
+            // else if (totalAngle<-30){
+            //     duty7 = 0;
+            //     duty8 = pidDuty;
+            // }
+            // else{
+            //     duty7 = 0;
+            //     duty8 = 0;
+            // }
+            // break;
+
+            //BETTER SPRING BASED ON WALL
+            wallDistance = 4;
+            if (revs>wallDistance){
+                duty7 = MAXDUTY;
                 duty8 = 0;
-
-            } 
-            else if (totalAngle<-30){
+            }
+            else if(revs < (0 - wallDistance)){
                 duty7 = 0;
-                duty8 = pidDuty;
+                duty8 = MAXDUTY;
             }
             else{
                 duty7 = 0;
                 duty8 = 0;
             }
-            break;
 
         case DAMPER:
 
             if(abs(diff)<=5000){
                 if (diff>10){
-                    duty8 = 40000+abs(diff)*30;
+                    duty8 = 40000+abs(diff)*val1;
                     duty7 = 0;
                 }
                 else if (diff<-10){
-                    duty7 = 40000+abs(diff)*30;
+                    duty7 = 40000+abs(diff)*val1;
                     duty8 = 0;
                 } 
                 else{
@@ -152,6 +168,7 @@ void calculateDuty(uint16_t controlMode){
             break;
 
         case TEXTURE:
+            wallDistance = val1;
             if (revs > 1 && revs < wallDistance){
                 duty7 = MAXDUTY-24000;
                 duty8 = 0;
@@ -175,6 +192,7 @@ void calculateDuty(uint16_t controlMode){
             break;
 
         case WALL:
+            wallDistance = val1;
             if (revs>wallDistance){
                 duty7 = MAXDUTY;
                 duty8 = 0;
@@ -190,7 +208,7 @@ void calculateDuty(uint16_t controlMode){
     }
 }
 
-void drawCar(controlMode){
+void drawCar(){
     if(controlMode == WALL){
         int i,j;
         printf("|"); 
@@ -373,8 +391,6 @@ int16_t main(void) {
 
     float freq = 10000;
 
-    uint8_t val = 1;
-    uint8_t controlMode = 0;
 
     ENC_MISO = &D[1];
     ENC_MOSI = &D[0];
@@ -416,18 +432,18 @@ int16_t main(void) {
 
 
 
-            pConstant = 70;
-            iConstant = 8;
+            //pConstant = val1;   //70
+            //iConstant = val2;   //8
             //dConstant = 0;
 
             // voltage0Reading = pin_read(VOLTAGE0);
             controlMode = SPRING;
-            calculateDuty(controlMode);
+            calculateDuty();
             pin_write(&D[7], duty7);
             pin_write(&D[8], duty8); 
 
 
-            //drawCar(controlMode);
+            drawCar(controlMode);
             // printf("duty7:%u\n\r",duty7);
             // printf("duty8:%u\n\r",duty8);
             //printf("Voltage 0 = %u\n\r", voltage0Reading);
@@ -436,11 +452,11 @@ int16_t main(void) {
             //printf("cumalativeAngle: %u\n\r", cumalativeAngle);
             //printf("totalAngle: %u\n\r", totalAngle);
 
-            printf("pidDuty: %i\n\r",pidDuty);
-            printf("Duty7 = %u\n\r",totalAngle);
-            printf("Duty8 = %u\n\r",cumalativeAngle);
-            printf("Duty7 = %u\n\r",duty8);
-            printf("Duty8 = %u\n\r",duty7);
+            //printf("pidDuty: %i\n\r",pidDuty);
+            // printf("Duty7 = %u\n\r",totalAngle);
+            // printf("Duty8 = %u\n\r",cumalativeAngle);
+            //printf("Duty7 = %u\n\r",duty8);
+            //printf("Duty8 = %u\n\r",duty7);
             led_toggle(&led1);
         }
 
