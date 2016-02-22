@@ -41,9 +41,10 @@ volatile uint16_t voltage0Reading = 0;
 volatile uint8_t wallDistance = 6;
 volatile int16_t totalAngle=0; 
 volatile uint16_t cumalativeAngle=0; 
-volatile int16_t iConstant, pConstant, dConstant;
-volatile int8_t direction;
+volatile int8_t iConstant = 1;
+volatile int8_t pConstant = 1;
 volatile int16_t diff = 0;
+volatile uint16_t pidDuty;
 
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
 _PIN *ENC_NCS;
@@ -109,13 +110,14 @@ void resultMath(uint16_t result) {
 
 void calculateDuty(uint16_t controlMode){
 
-    //printf("Print revs2: %i\n\r", revs);
 
     switch(controlMode){
         case SPRING:
+
             totalAngle = revs*256+Angle/256;
-            cumalativeAngle = cumalativeAngle + abs(totalAngle)/4;
-            uint16_t pidDuty = MAXDUTY - cumalativeAngle/iConstant - pConstant*totalAngle - dConstant*abs(Angle-prevAngle)/256;
+            cumalativeAngle = cumalativeAngle + abs(totalAngle);
+            pidDuty = MAXDUTY - cumalativeAngle/iConstant - pConstant*abs(totalAngle);
+
             if(totalAngle>30){
                 duty7 = pidDuty;
                 duty8 = 0;
@@ -130,8 +132,6 @@ void calculateDuty(uint16_t controlMode){
                 duty8 = 0;
             }
             break;
-
-
 
         case DAMPER:
 
@@ -149,11 +149,6 @@ void calculateDuty(uint16_t controlMode){
                     duty8 = 0;
                 }
             }
-            //rework if breaks while in damper
-            // else{
-
-            // }
-
             break;
 
         case TEXTURE:
@@ -326,6 +321,7 @@ void VendorRequests(void) {
             BD[EP0IN].status = 0xC8;    // send packet as DATA1, set UOWN bit
             break;
         case GET_VALS:
+            led_toggle(&led2);
             temp.w = val1;
             BD[EP0IN].address[0] = temp.b[0];
             BD[EP0IN].address[1] = temp.b[1];
@@ -359,7 +355,12 @@ void VendorRequestsOut(void) {
     }
 }
 
-int16_t main(void) {
+void service1(_TIMER *self) {
+    ServiceUSB();                   // serviceUSB
+    led_toggle(&led3);
+    }
+
+int16_t main() {
     init_clock();
     init_ui();
     init_pin();
@@ -388,6 +389,7 @@ int16_t main(void) {
     timer_setPeriod(&timer2, .05);
     timer_start(&timer2);
 
+
     spi_open(&spi1, ENC_MISO, ENC_MOSI, ENC_SCK, 2e6 ,1);
 
     oc_pwm(&oc1, &D[7], NULL, freq, 0); 
@@ -397,6 +399,7 @@ int16_t main(void) {
     while (USB_USWSTAT!=CONFIG_STATE) {     // while the peripheral is not configured...
         ServiceUSB();                       // ...service USB requests
     }
+    timer_every(&timer3, .001,*service1);
 
     while (1) {
 
@@ -404,17 +407,18 @@ int16_t main(void) {
         //printf("controlMode:%u\n\t",controlMode );
         //calculateDuty(controlMode);
         //pin_write(&D[pin], duty);
-        ServiceUSB();                       // service any pending USB requests
+        //ServiceUSB();                       // service any pending USB requests
 
 
         if (timer_flag(&timer2)) {
             timer_lower(&timer2);
-            pConstant = val1;
-            iConstant = val2;
-            dConstant = 0;
+
+
+            pConstant = 5;
+            iConstant = 5;
 
             // voltage0Reading = pin_read(VOLTAGE0);
-            controlMode = DAMPER;
+            controlMode = SPRING;
             calculateDuty(controlMode);
             pin_write(&D[7], duty7);
             pin_write(&D[8], duty8); 
@@ -429,12 +433,11 @@ int16_t main(void) {
             //printf("cumalativeAngle: %u\n\r", cumalativeAngle);
             //printf("totalAngle: %u\n\r", totalAngle);
 
-            printf("diff: %i\n\r", diff);
+            printf("pidDuty: %i\n\r",pidDuty);
+            printf("Duty7 = %u\n\r",totalAngle);
+            printf("Duty8 = %u\n\r",cumalativeAngle);
             printf("Duty7 = %u\n\r",duty8);
             printf("Duty8 = %u\n\r",duty7);
-            
-
-
             led_toggle(&led1);
         }
 
