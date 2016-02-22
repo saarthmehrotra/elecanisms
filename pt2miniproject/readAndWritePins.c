@@ -398,11 +398,6 @@ int16_t main(void) {
     oc_pwm(&oc2, &D[8], NULL, freq, 0); 
 
     InitUSB();                              // initialize the USB registers and serial interface engine
-
-    while (USB_USWSTAT!=CONFIG_STATE) {     // while the peripheral is not configured...
-        ServiceUSB();                       // ...service USB requests
-    }
-
     IEC5bits.USB1IE = 1;                    // Enable USB Interrupt
 
 
@@ -412,7 +407,7 @@ int16_t main(void) {
         //printf("controlMode:%u\n\t",controlMode );
         //calculateDuty(controlMode);
         //pin_write(&D[pin], duty);
-        //ServiceUSB();                       // service any pending USB requests
+        ServiceUSB();                       // service any pending USB requests
 
 
         if (timer_flag(&timer2)) {
@@ -423,7 +418,7 @@ int16_t main(void) {
 
             pConstant = 70;
             iConstant = 8;
-            dConstant = 0;
+            //dConstant = 0;
 
             // voltage0Reading = pin_read(VOLTAGE0);
             controlMode = SPRING;
