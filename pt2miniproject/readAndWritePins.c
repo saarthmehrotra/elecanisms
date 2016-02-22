@@ -14,7 +14,6 @@
 #define TOGGLE_LED1         11
 #define TOGGLE_LED2         12
 #define READ_SW1            13
-#define ENC_WRITE_REG       4
 #define ENC_READ_REG        5
 #define SET_VALS            6
 #define GET_VALS            7
@@ -31,7 +30,8 @@
 #define WALL           0
 #define MAXDUTY        65535
 
-volatile int16_t val1, val2;
+volatile uint16_t val1 = 1;
+volatile uint16_t val2 = 1;
 volatile int16_t revs = 0;
 volatile int16_t prevAngle = 0;
 volatile int16_t Angle=0; 
@@ -41,9 +41,11 @@ volatile uint16_t voltage0Reading = 0;
 volatile uint8_t wallDistance = 6;
 volatile int16_t totalAngle=0; 
 volatile uint16_t cumalativeAngle=0; 
-volatile int16_t iConstant, pConstant, dConstant;
-volatile int8_t direction;
+volatile int8_t iConstant = 1;
+volatile int8_t pConstant = 1;
 volatile int16_t diff = 0;
+volatile uint16_t pidDuty;
+volatile uint8_t controlMode;
 
 _PIN *ENC_SCK, *ENC_MISO, *ENC_MOSI;
 _PIN *ENC_NCS;
@@ -107,41 +109,55 @@ void resultMath(uint16_t result) {
 }
 
 
-void calculateDuty(uint16_t controlMode){
+void calculateDuty(){
 
-    //printf("Print revs2: %i\n\r", revs);
 
     switch(controlMode){
         case SPRING:
-            totalAngle = revs*256+Angle/256;
-            cumalativeAngle = cumalativeAngle + abs(totalAngle)/4;
-            uint16_t pidDuty = MAXDUTY - cumalativeAngle/iConstant - pConstant*totalAngle - dConstant*abs(Angle-prevAngle)/256;
-            if(totalAngle>30){
-                duty7 = pidDuty;
-                duty8 = 0;
+            //ACTUAL SPRING
+            // totalAngle = revs*256+Angle/256;
+            // cumalativeAngle = cumalativeAngle + abs(totalAngle);
+            // pidDuty = MAXDUTY - cumalativeAngle/val2 - val1*abs(totalAngle);
 
-            } 
-            else if (totalAngle<-30){
+            // if(totalAngle>30){
+            //     duty7 = pidDuty;
+            //     duty8 = 0;
+
+            // } 
+            // else if (totalAngle<-30){
+            //     duty7 = 0;
+            //     duty8 = pidDuty;
+            // }
+            // else{
+            //     duty7 = 0;
+            //     duty8 = 0;
+            // }
+            // break;
+
+            //BETTER SPRING BASED ON WALL
+            wallDistance = 4;
+            if (revs>wallDistance){
+                duty7 = MAXDUTY;
+                duty8 = 0;
+            }
+            else if(revs < (0 - wallDistance)){
                 duty7 = 0;
-                duty8 = pidDuty;
+                duty8 = MAXDUTY;
             }
             else{
                 duty7 = 0;
                 duty8 = 0;
             }
-            break;
-
-
 
         case DAMPER:
 
             if(abs(diff)<=5000){
                 if (diff>10){
-                    duty8 = 40000+abs(diff)*30;
+                    duty8 = 40000+abs(diff)*val1;
                     duty7 = 0;
                 }
                 else if (diff<-10){
-                    duty7 = 40000+abs(diff)*30;
+                    duty7 = 40000+abs(diff)*val1;
                     duty8 = 0;
                 } 
                 else{
@@ -149,14 +165,10 @@ void calculateDuty(uint16_t controlMode){
                     duty8 = 0;
                 }
             }
-            //rework if breaks while in damper
-            // else{
-
-            // }
-
             break;
 
         case TEXTURE:
+            wallDistance = val1;
             if (revs > 1 && revs < wallDistance){
                 duty7 = MAXDUTY-24000;
                 duty8 = 0;
@@ -180,6 +192,7 @@ void calculateDuty(uint16_t controlMode){
             break;
 
         case WALL:
+            wallDistance = val1;
             if (revs>wallDistance){
                 duty7 = MAXDUTY;
                 duty8 = 0;
@@ -195,7 +208,7 @@ void calculateDuty(uint16_t controlMode){
     }
 }
 
-void drawCar(controlMode){
+void drawCar(){
     if(controlMode == WALL){
         int i,j;
         printf("|"); 
@@ -326,6 +339,7 @@ void VendorRequests(void) {
             BD[EP0IN].status = 0xC8;    // send packet as DATA1, set UOWN bit
             break;
         case GET_VALS:
+            led_toggle(&led2);
             temp.w = val1;
             BD[EP0IN].address[0] = temp.b[0];
             BD[EP0IN].address[1] = temp.b[1];
@@ -359,12 +373,14 @@ void VendorRequestsOut(void) {
     }
 }
 
+
 //Map USB Interrupt service routine to ServiceUSB()
 void __attribute__((interrupt, auto_psv)) _USB1Interrupt(void) {
     ServiceUSB();
 }
 
 int16_t main(void) {
+
     init_clock();
     init_ui();
     init_pin();
@@ -375,8 +391,6 @@ int16_t main(void) {
 
     float freq = 10000;
 
-    uint8_t val = 1;
-    uint8_t controlMode = 0;
 
     ENC_MISO = &D[1];
     ENC_MOSI = &D[0];
@@ -393,6 +407,7 @@ int16_t main(void) {
     timer_setPeriod(&timer2, .05);
     timer_start(&timer2);
 
+
     spi_open(&spi1, ENC_MISO, ENC_MOSI, ENC_SCK, 2e6 ,1);
 
     oc_pwm(&oc1, &D[7], NULL, freq, 0); 
@@ -400,6 +415,7 @@ int16_t main(void) {
 
     InitUSB();                              // initialize the USB registers and serial interface engine
     IEC5bits.USB1IE = 1;                    // Enable USB Interrupt
+
 
     while (1) {
 
@@ -412,18 +428,23 @@ int16_t main(void) {
 
         if (timer_flag(&timer2)) {
             timer_lower(&timer2);
-            pConstant = 70;
-            iConstant = 8;
-            dConstant = 0;
+
+
+
+
+            //pConstant = val1;   //70
+            //iConstant = val2;   //8
+            //dConstant = 0;
 
             // voltage0Reading = pin_read(VOLTAGE0);
-            controlMode = TEXTURE;
+            
             calculateDuty(controlMode);
+            controlMode = SPRING;
             pin_write(&D[7], duty7);
             pin_write(&D[8], duty8); 
 
 
-            //drawCar(controlMode);
+            drawCar(controlMode);
             // printf("duty7:%u\n\r",duty7);
             // printf("duty8:%u\n\r",duty8);
             //printf("Voltage 0 = %u\n\r", voltage0Reading);
@@ -431,12 +452,11 @@ int16_t main(void) {
 
             //printf("cumalativeAngle: %u\n\r", cumalativeAngle);
             //printf("totalAngle: %u\n\r", totalAngle);
-            printf("%i,%u\n\r", revs, duty7);
-            // printf("diff: %i\n\r", diff);
-            // printf("Duty7 = %u\n\r",duty8);
-            // printf("Duty8 = %u\n\r",duty7);
-            
-
+            //printf("pidDuty: %i\n\r",pidDuty);
+            // printf("Duty7 = %u\n\r",totalAngle);
+            // printf("Duty8 = %u\n\r",cumalativeAngle);
+            //printf("Duty7 = %u\n\r",duty8);
+            //printf("Duty8 = %u\n\r",duty7);
 
             led_toggle(&led1);
         }

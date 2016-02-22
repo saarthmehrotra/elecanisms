@@ -11,6 +11,7 @@ ENC_MAG = 0x3FFE
 ENC_ANGLE = 0x3FFF
 print 2**14
 angleList = []
+
 f = open('data.csv', 'w')
 
 # x = input("Enter pConstant Value (0 to 255):")
@@ -28,6 +29,7 @@ while(1):
 # 	cumalativeAngle = cumalativeAngle + abs(totalAngle)/4;
 #  	uint16_t pidDuty = MAXDUTY - cumalativeAngle/iConstant - pConstant*totalAngle - dConstant*abs(Angle-prevAngle)/256;
 
+
 	# myencoder.set_vals(x,y)
 	# print myencoder.get_vals()
 	pack = myencoder.enc_readReg(ENC_ANGLE)
@@ -42,7 +44,7 @@ while(1):
 	intAngle = int(binAngle,2)
 	# print "int = ",angle
 	angle = (intAngle*360.0)/(2**14)
-	# print "angle = ",angle
+
 	if binAngleOrig[3] == "0":
 		#print "angle = ", angle, "  intAngle = ", intAngle, "   binAngle = ", binAngle, "   binAngleTruncated = ", binAngleOrig[4:], "   binAngleOrig = ", binAngleOrig, "   origAngle = ", origAngle 
 		print angle
