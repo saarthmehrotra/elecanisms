@@ -359,6 +359,11 @@ void VendorRequestsOut(void) {
     }
 }
 
+//Map USB Interrupt service routine to ServiceUSB()
+void __attribute__((interrupt, auto_psv)) _USB1Interrupt(void) {
+    ServiceUSB();
+}
+
 int16_t main(void) {
     init_clock();
     init_ui();
@@ -394,9 +399,7 @@ int16_t main(void) {
     oc_pwm(&oc2, &D[8], NULL, freq, 0); 
 
     InitUSB();                              // initialize the USB registers and serial interface engine
-    while (USB_USWSTAT!=CONFIG_STATE) {     // while the peripheral is not configured...
-        ServiceUSB();                       // ...service USB requests
-    }
+    IEC5bits.USB1IE = 1;                    // Enable USB Interrupt
 
     while (1) {
 
@@ -409,12 +412,12 @@ int16_t main(void) {
 
         if (timer_flag(&timer2)) {
             timer_lower(&timer2);
-            pConstant = val1;
-            iConstant = val2;
+            pConstant = 70;
+            iConstant = 8;
             dConstant = 0;
 
             // voltage0Reading = pin_read(VOLTAGE0);
-            controlMode = DAMPER;
+            controlMode = SPRING;
             calculateDuty(controlMode);
             pin_write(&D[7], duty7);
             pin_write(&D[8], duty8); 
