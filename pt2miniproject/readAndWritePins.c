@@ -417,7 +417,7 @@ int16_t main(void) {
             dConstant = 0;
 
             // voltage0Reading = pin_read(VOLTAGE0);
-            controlMode = SPRING;
+            controlMode = TEXTURE;
             calculateDuty(controlMode);
             pin_write(&D[7], duty7);
             pin_write(&D[8], duty8); 
@@ -431,10 +431,10 @@ int16_t main(void) {
 
             //printf("cumalativeAngle: %u\n\r", cumalativeAngle);
             //printf("totalAngle: %u\n\r", totalAngle);
-
-            printf("diff: %i\n\r", diff);
-            printf("Duty7 = %u\n\r",duty8);
-            printf("Duty8 = %u\n\r",duty7);
+            printf("%i,%u\n\r", revs, duty7);
+            // printf("diff: %i\n\r", diff);
+            // printf("Duty7 = %u\n\r",duty8);
+            // printf("Duty8 = %u\n\r",duty7);
             
 
 

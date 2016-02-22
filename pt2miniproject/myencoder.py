@@ -11,7 +11,7 @@ ENC_MAG = 0x3FFE
 ENC_ANGLE = 0x3FFF
 print 2**14
 angleList = []
-#f = open('data.csv', 'w')
+f = open('data.csv', 'w')
 
 # x = input("Enter pConstant Value (0 to 255):")
 # y = input("Enter iConstant Value (1/x and x = 0 to 16):")
@@ -40,14 +40,15 @@ while(1):
 	binAngleOrig = format(origAngle, '#018b')
 	binAngle = binAngleOrig[4:]
 	intAngle = int(binAngle,2)
-	#print "int = ",angle
+	# print "int = ",angle
 	angle = (intAngle*360.0)/(2**14)
-	#if binAngleOrig[3] == "0":
+	# print "angle = ",angle
+	if binAngleOrig[3] == "0":
 		#print "angle = ", angle, "  intAngle = ", intAngle, "   binAngle = ", binAngle, "   binAngleTruncated = ", binAngleOrig[4:], "   binAngleOrig = ", binAngleOrig, "   origAngle = ", origAngle 
-		#print angle
+		print angle
 		#time.sleep(1)
-		#f.write(str(angle)+',')
-	# angleList.append(angle)
+		f.write(str(angle)+',')
+	angleList.append(angle)
 
 
 
